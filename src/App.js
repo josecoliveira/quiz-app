@@ -12,6 +12,7 @@ class App extends React.Component {
       screen: "home",
       question: 0
     }
+    this.handleBegin = this.handleBegin.bind(this);
   }
 
   handleBegin() {
