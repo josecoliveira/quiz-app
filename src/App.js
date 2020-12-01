@@ -8,33 +8,32 @@ import Container from 'react-bootstrap/Container';
 
 import Home from './components/Home';
 import Question from './components/Question';
+import Score from './components/Score';
+
+const apiUrl = "https://opentdb.com/api.php?amount=10&difficulty=hard&type=boolean";
 
 class App extends React.Component {
   constructor(props) {
     super(props);
     this.state = {
-      screen: "home",
-      questionNumber: -1,
-      loading: true
+      screen: "loading",
+      questionNumber: -1
     };
     this.score = 0;
   }
 
   componentDidMount() {
-    const apiUrl = "https://opentdb.com/api.php?amount=10&difficulty=hard&type=boolean";
     fetch(apiUrl)
       .then((response) => response.json())
       .then((data) => {
         this.setState((state, props) => ({
-          loading: false
+          screen: "home"
         }));
         this.questions = data.results;
-        console.log(data);
       });
   }
 
   handleBegin() {
-    console.log("Test");
     this.setState((state, props) => ({
       questionNumber: state.questionNumber + 1,
       screen: "question"
@@ -47,18 +46,31 @@ class App extends React.Component {
     if (this.questions[questionNumber].correct_answer === answer) {
       this.score++;
     }
-    console.log("questionNumber " + questionNumber);
     if (questionNumber + 1 === 10) {
-      console.log("show score")
       this.setState((state, props) => ({
         screen: "score"
       }));
     } else {
-      console.log("next question")
       this.setState((state, props) => ({
         questionNumber: questionNumber + 1
       }));
     }
+  }
+
+  handlePlayAgain() {
+    this.setState((state, props) => ({
+      screen: "loading"
+    }));
+    fetch(apiUrl)
+      .then((response) => response.json())
+      .then((data) => {
+        this.setState((state, props) => ({
+          screen: "home",
+          questionNumber: -1
+        }));
+        this.score = 0;
+        this.questions = data.results;
+      });
   }
 
   renderLoading() {
@@ -86,9 +98,19 @@ class App extends React.Component {
     );
   }
 
+  renderScore() {
+    const questions = this.questions;
+    const score = this.score;
+    return (
+      <Score
+        questions={questions}
+        score={score}
+        handlePlayAgain={() => this.handlePlayAgain()} />
+    );
+  }
+
   render() {
     const screen = this.state.screen;
-    const loading = this.state.loading;
     return (
       <div className="App">
         <Navbar bg="dark" variant="dark">
@@ -96,14 +118,14 @@ class App extends React.Component {
         </Navbar>
         {
           (() => {
-            if (loading) {
+            if (screen === "loading") {
               return this.renderLoading();
             } else if (screen === "home") {
               return this.renderHome();
             } else if (screen === "question") {
               return this.renderQuestion();
             } else if (screen === "score") {
-              return <p>Score</p>
+              return this.renderScore();
             }
           })()
         }

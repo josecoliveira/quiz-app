@@ -15,7 +15,7 @@ class Home extends React.Component {
         <Button
           variant="primary"
           onClick={() => handleBegin()}
-        >BEGIN</Button>
+        >Begin</Button>
       </Container>
     );
   }
